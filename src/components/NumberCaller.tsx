@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Play, Pause, RotateCcw, Volume2 } from 'lucide-react';
 import { useGame } from '../context/GameContext';
+import { updateRoomGameState } from '../utils/roomStorage';
 
 interface NumberCallerProps {
   soundEnabled: boolean;
+  roomId?: string;
 }
 
-const NumberCaller: React.FC<NumberCallerProps> = ({ soundEnabled }) => {
+const NumberCaller: React.FC<NumberCallerProps> = ({ soundEnabled, roomId }) => {
   const [isAutoMode, setIsAutoMode] = useState(false);
   const [autoInterval, setAutoInterval] = useState<NodeJS.Timeout | null>(null);
   const { gameState, callNumber, resetGame } = useGame();
@@ -40,6 +42,18 @@ const NumberCaller: React.FC<NumberCallerProps> = ({ soundEnabled }) => {
     const number = gameState.availableNumbers[randomIndex];
     callNumber(number);
     speakNumber(number);
+    
+    // Sync to room storage
+    if (roomId) {
+      setTimeout(() => {
+        updateRoomGameState(roomId, {
+          ...gameState,
+          currentNumber: number,
+          calledNumbers: [...gameState.calledNumbers, number],
+          availableNumbers: gameState.availableNumbers.filter(n => n !== number)
+        });
+      }, 100);
+    }
   };
 
   const toggleAutoMode = () => {

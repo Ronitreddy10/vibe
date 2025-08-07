@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Dice6, Users, Play, Star, Sparkles } from 'lucide-react';
+import { roomExists } from '../utils/roomStorage';
+import { useRoomSync } from '../hooks/useRoomSync';
 
 interface LandingPageProps {
   onUserLogin: (username: string) => void;
@@ -11,23 +13,43 @@ const LandingPage: React.FC<LandingPageProps> = ({ onUserLogin, onRoomJoin, curr
   const [username, setUsername] = useState('');
   const [roomId, setRoomId] = useState('');
   const [showRoomInput, setShowRoomInput] = useState(false);
+  const [error, setError] = useState('');
+  const { joinRoom, createRoom } = useRoomSync(null, null);
 
   const handleLogin = () => {
     if (username.trim()) {
       onUserLogin(username.trim());
       setShowRoomInput(true);
+      setError('');
     }
   };
 
   const handleCreateRoom = () => {
+    if (!currentUser) return;
+    
     const newRoomId = `ROOM-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+    createRoom(newRoomId, currentUser);
     onRoomJoin(newRoomId);
   };
 
   const handleJoinRoom = () => {
-    if (roomId.trim()) {
-      onRoomJoin(roomId.trim().toUpperCase());
+    if (!roomId.trim() || !currentUser) return;
+    
+    const trimmedRoomId = roomId.trim().toUpperCase();
+    
+    if (!roomExists(trimmedRoomId)) {
+      setError('Room not found. Please check the Room ID.');
+      return;
     }
+    
+    const success = joinRoom(currentUser);
+    if (!success) {
+      setError('Unable to join room. It may be full or no longer exist.');
+      return;
+    }
+    
+    setError('');
+    onRoomJoin(trimmedRoomId);
   };
 
   return (
@@ -137,6 +159,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onUserLogin, onRoomJoin, curr
                       onKeyPress={(e) => e.key === 'Enter' && handleJoinRoom()}
                       className="w-full px-4 py-3 bg-white/20 border border-white/30 rounded-lg text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
                     />
+                    {error && (
+                      <p className="text-red-400 text-sm">{error}</p>
+                    )}
                     <button
                       onClick={handleJoinRoom}
                       disabled={!roomId.trim()}

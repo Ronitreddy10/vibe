@@ -4,6 +4,7 @@ import TambolaTicket from './TambolaTicket';
 import NumberCaller from './NumberCaller';
 import PlayersList from './PlayersList';
 import { useGame } from '../context/GameContext';
+import { useRoomSync } from '../hooks/useRoomSync';
 
 interface GameRoomProps {
   user: string;
@@ -15,10 +16,16 @@ const GameRoom: React.FC<GameRoomProps> = ({ user, roomId, onLeaveRoom }) => {
   const [tickets, setTickets] = useState<number[][][]>([]);
   const [isSoundEnabled, setIsSoundEnabled] = useState(true);
   const { gameState, players, addPlayer } = useGame();
+  const { leaveRoom } = useRoomSync(roomId, user);
 
   useEffect(() => {
-    addPlayer({ id: user, name: user, ticketCount: 0, isHost: true });
-  }, [user, addPlayer]);
+    // Player is already added through room sync
+  }, []);
+
+  const handleLeaveRoom = () => {
+    leaveRoom();
+    onLeaveRoom();
+  };
 
   const generateTickets = (count: number = 1) => {
     const newTickets: number[][][] = [];
@@ -86,7 +93,7 @@ const GameRoom: React.FC<GameRoomProps> = ({ user, roomId, onLeaveRoom }) => {
               {isSoundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
             </button>
             <button
-              onClick={onLeaveRoom}
+              onClick={handleLeaveRoom}
               className="flex items-center gap-2 px-4 py-2 bg-red-500/20 backdrop-blur-lg rounded-lg border border-red-500/30 text-red-200 hover:bg-red-500/30 transition-all"
             >
               <LogOut className="w-4 h-4" />
@@ -133,7 +140,7 @@ const GameRoom: React.FC<GameRoomProps> = ({ user, roomId, onLeaveRoom }) => {
           {/* Right Panel */}
           <div className="space-y-6">
             {/* Number Caller */}
-            <NumberCaller soundEnabled={isSoundEnabled} />
+            <NumberCaller soundEnabled={isSoundEnabled} roomId={roomId} />
             
             {/* Players List */}
             <PlayersList players={players} />

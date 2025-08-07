@@ -20,13 +20,17 @@ interface GameContextType {
   resetGame: () => void;
   addPlayer: (player: Player) => void;
   removePlayer: (playerId: string) => void;
+  setGameState: (gameState: GameState) => void;
+  setPlayers: (players: Player[]) => void;
 }
 
 type GameAction = 
   | { type: 'CALL_NUMBER'; payload: number }
   | { type: 'RESET_GAME' }
   | { type: 'ADD_PLAYER'; payload: Player }
-  | { type: 'REMOVE_PLAYER'; payload: string };
+  | { type: 'REMOVE_PLAYER'; payload: string }
+  | { type: 'SET_GAME_STATE'; payload: GameState }
+  | { type: 'SET_PLAYERS'; payload: Player[] };
 
 const initialGameState: GameState = {
   currentNumber: null,
@@ -50,6 +54,8 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         ...initialGameState,
         availableNumbers: Array.from({ length: 90 }, (_, i) => i + 1),
       };
+    case 'SET_GAME_STATE':
+      return action.payload;
     default:
       return state;
   }
@@ -62,6 +68,8 @@ const playersReducer = (state: Player[], action: GameAction): Player[] => {
       return [...state, action.payload];
     case 'REMOVE_PLAYER':
       return state.filter(p => p.id !== action.payload);
+    case 'SET_PLAYERS':
+      return action.payload;
     default:
       return state;
   }
@@ -89,6 +97,14 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     playersDispatch({ type: 'REMOVE_PLAYER', payload: playerId });
   };
 
+  const setGameState = (gameState: GameState) => {
+    gameDispatch({ type: 'SET_GAME_STATE', payload: gameState });
+  };
+
+  const setPlayers = (players: Player[]) => {
+    playersDispatch({ type: 'SET_PLAYERS', payload: players });
+  };
+
   return (
     <GameContext.Provider value={{
       gameState,
@@ -97,6 +113,8 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       resetGame,
       addPlayer,
       removePlayer,
+      setGameState,
+      setPlayers,
     }}>
       {children}
     </GameContext.Provider>
