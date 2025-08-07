@@ -5,6 +5,7 @@ import NumberCaller from './NumberCaller';
 import PlayersList from './PlayersList';
 import { useGame } from '../context/GameContext';
 import { useRoomSync } from '../hooks/useRoomSync';
+import { getRoom, addPlayerToRoom } from '../utils/roomStorage';
 
 interface GameRoomProps {
   user: string;
@@ -19,7 +20,16 @@ const GameRoom: React.FC<GameRoomProps> = ({ user, roomId, onLeaveRoom }) => {
   const { leaveRoom } = useRoomSync(roomId, user);
 
   useEffect(() => {
-    // Player is already added through room sync
+    // Ensure current user is added to the room when component mounts
+    const currentRoom = getRoom(roomId);
+    if (currentRoom && !currentRoom.players.find(p => p.id === user)) {
+      addPlayerToRoom(roomId, {
+        id: user,
+        name: user,
+        ticketCount: 0,
+        isHost: false
+      });
+    }
   }, []);
 
   const handleLeaveRoom = () => {

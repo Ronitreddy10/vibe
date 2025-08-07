@@ -14,7 +14,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onUserLogin, onRoomJoin, curr
   const [roomId, setRoomId] = useState('');
   const [showRoomInput, setShowRoomInput] = useState(false);
   const [error, setError] = useState('');
-  const { joinRoom, createRoom } = useRoomSync(null, null);
+  const { joinRoom, createRoom } = useRoomSync(null, currentUser);
 
   const handleLogin = () => {
     if (username.trim()) {
@@ -28,8 +28,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ onUserLogin, onRoomJoin, curr
     if (!currentUser) return;
     
     const newRoomId = `ROOM-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
-    createRoom(newRoomId, currentUser);
-    onRoomJoin(newRoomId);
+    const success = createRoom(newRoomId, currentUser);
+    if (success) {
+      onRoomJoin(newRoomId);
+    } else {
+      setError('Failed to create room. Please try again.');
+    }
   };
 
   const handleJoinRoom = () => {
@@ -42,7 +46,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onUserLogin, onRoomJoin, curr
       return;
     }
     
-    const success = joinRoom(currentUser);
+    const success = joinRoom(trimmedRoomId, currentUser);
     if (!success) {
       setError('Unable to join room. It may be full or no longer exist.');
       return;

@@ -33,10 +33,10 @@ export const useRoomSync = (roomId: string | null, currentUser: string | null) =
   }, [roomId, setGameState, setPlayers]);
 
   // Join room
-  const joinRoom = useCallback((username: string): boolean => {
-    if (!roomId) return false;
+  const joinRoom = useCallback((targetRoomId: string, username: string): boolean => {
+    if (!targetRoomId) return false;
     
-    const room = getRoom(roomId);
+    const room = getRoom(targetRoomId);
     if (!room) {
       // Room doesn't exist
       return false;
@@ -47,6 +47,13 @@ export const useRoomSync = (roomId: string | null, currentUser: string | null) =
       return false;
     }
     
+    // Check if player already exists in the room
+    const existingPlayer = room.players.find(p => p.id === username);
+    if (existingPlayer) {
+      // Player already in room, just return success
+      return true;
+    }
+    
     const player = {
       id: username,
       name: username,
@@ -54,8 +61,8 @@ export const useRoomSync = (roomId: string | null, currentUser: string | null) =
       isHost: false
     };
     
-    return addPlayerToRoom(roomId, player);
-  }, [roomId]);
+    return addPlayerToRoom(targetRoomId, player);
+  }, []);
 
   // Create room
   const createRoom = useCallback((roomId: string, hostName: string): boolean => {
