@@ -40,18 +40,23 @@ const LandingPage: React.FC<LandingPageProps> = ({ onUserLogin, onRoomJoin, curr
     if (!roomId.trim() || !currentUser) return;
     
     const trimmedRoomId = roomId.trim().toUpperCase();
+    console.log('Attempting to join room:', trimmedRoomId);
     
     if (!roomExists(trimmedRoomId)) {
+      console.log('Room does not exist:', trimmedRoomId);
       setError('Room not found. Please check the Room ID.');
       return;
     }
     
+    console.log('Room exists, attempting to join...');
     const success = joinRoom(trimmedRoomId, currentUser);
     if (!success) {
+      console.log('Failed to join room');
       setError('Unable to join room. It may be full or no longer exist.');
       return;
     }
     
+    console.log('Successfully joined room');
     setError('');
     onRoomJoin(trimmedRoomId);
   };

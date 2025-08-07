@@ -34,6 +34,8 @@ export const saveRoom = (roomData: RoomData): void => {
 export const getRoom = (roomId: string): RoomData | null => {
   try {
     const rooms = getRooms();
+    console.log('All rooms:', Object.keys(rooms));
+    console.log('Looking for room:', roomId);
     const room = rooms[roomId];
     
     if (!room) return null;
@@ -72,7 +74,12 @@ export const deleteRoom = (roomId: string): void => {
 };
 
 export const roomExists = (roomId: string): boolean => {
-  return getRoom(roomId) !== null;
+  const room = getRoom(roomId);
+  console.log('Checking if room exists:', roomId, 'Result:', room !== null);
+  if (room) {
+    console.log('Room data:', room);
+  }
+  return room !== null;
 };
 
 export const addPlayerToRoom = (roomId: string, player: { id: string; name: string; ticketCount: number; isHost: boolean }): boolean => {
