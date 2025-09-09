@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Dice6, Users, Play, Star, Sparkles } from 'lucide-react';
-import { roomExists } from '../utils/roomStorage';
+import { roomExists, listAllRooms, createTestRoom } from '../utils/roomStorage';
 import { useRoomSync } from '../hooks/useRoomSync';
 
 interface LandingPageProps {
@@ -42,6 +42,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onUserLogin, onRoomJoin, curr
     const trimmedRoomId = roomId.trim().toUpperCase();
     console.log('Attempting to join room:', trimmedRoomId);
     
+    // Debug: List all available rooms
+    listAllRooms();
+    
     if (!roomExists(trimmedRoomId)) {
       console.log('Room does not exist:', trimmedRoomId);
       setError('Room not found. Please check the Room ID.');
@@ -61,6 +64,13 @@ const LandingPage: React.FC<LandingPageProps> = ({ onUserLogin, onRoomJoin, curr
     onRoomJoin(trimmedRoomId);
   };
 
+  // Debug function to create a test room
+  const handleCreateTestRoom = () => {
+    const testRoomId = 'TEST-ROOM';
+    createTestRoom(testRoomId);
+    setRoomId(testRoomId);
+    setError('Test room created! You can now join it.');
+  };
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Animated Background */}
@@ -155,6 +165,13 @@ const LandingPage: React.FC<LandingPageProps> = ({ onUserLogin, onRoomJoin, curr
                     className="w-full py-3 bg-gradient-to-r from-green-500 to-teal-500 text-white font-semibold rounded-lg hover:from-green-600 hover:to-teal-600 transition-all transform hover:scale-105"
                   >
                     Create New Room
+                  </button>
+                  
+                  <button
+                    onClick={handleCreateTestRoom}
+                    className="w-full py-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg transition-all text-sm"
+                  >
+                    Create Test Room (TEST-ROOM)
                   </button>
                   
                   <div className="text-center text-gray-300">or</div>

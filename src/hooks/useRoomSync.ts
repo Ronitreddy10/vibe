@@ -87,7 +87,8 @@ export const useRoomSync = (roomId: string | null, currentUser: string | null) =
         calledNumbers: [],
         availableNumbers: Array.from({ length: 90 }, (_, i) => i + 1)
       },
-      createdAt: Date.now()
+      createdAt: Date.now(),
+      lastUpdated: Date.now()
     };
     
     saveRoom(newRoom);
